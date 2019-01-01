@@ -1,0 +1,21 @@
+sudo: required
+services:
+ - docker
+
+before_install:
+ - docker build -t edwolb/fib -f ./client/Dockerfile.dev ./client
+
+script:
+ - docker run edwolb/fib npm test -- --coverage
+
+after_success:
+ - docker build -t edwolb/fib-client ./client
+ - docker build -t edwolb/fib-server ./server
+ - docker build -t edwolb/fib-worker ./worker
+ - docker build -t edwolb/fib-nginx ./nginx
+ # Login to docker
+ - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+ - docker push edwolb/fib-client
+ - docker push edwolb/fib-server
+ - docker push edwolb/fib-worker
+ - docker push edwolb/fib-nginx
